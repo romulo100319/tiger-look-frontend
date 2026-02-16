@@ -13,15 +13,22 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/auth/login`, formData, {
+      const res = await axios.post(`${API_URL}/auth/login`, formData, {
         withCredentials: true 
       });
-      navigate('/dashboard');
+
+      if (res.status === 200) {
+        // 🚀 SAVE THE USER INFO HERE!
+        // This makes 'ProtectedRoute' happy.
+        localStorage.setItem('userInfo', JSON.stringify(res.data));
+        
+        console.log("Login successful, user saved to localStorage");
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     }
   };
-
   return (
     // 1. USE THE CLASS, REMOVE THE INLINE STYLE
     <div className="login-page">
