@@ -1,0 +1,241 @@
+/* =========================================
+   1. CORE VARIABLES (TIGERLOOK DARK THEME)
+   ========================================= */
+:root {
+  --sidebar-bg: #041d31;        /* Deep Navy */
+  --bg-main: #020d17;           /* Midnight Blue (Background) */
+  --primary: #2563eb;           /* Bright Blue */
+  --sidebar-text: #e2e8f0;      /* Light Text */
+  --surface: rgba(255, 255, 255, 0.03); /* Glass Effect */
+  --text-main: #f1f5f9;         /* White-ish Text */
+  --text-light: #94a3b8;        /* Gray Text */
+  --border: rgba(255, 255, 255, 0.1); /* Subtle Border */
+}
+
+/* =========================================
+   2. GLOBAL RESET & SCROLLING FIX
+   ========================================= */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  
+  /* CRITICAL FIX: Allows scrolling if content is too tall */
+  height: 100vh;
+  overflow-y: auto; 
+}
+
+/* =========================================
+   3. ANIMATED BACKGROUND (BLOBS)
+   ========================================= */
+.animated-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: -1; /* Stays behind everything */
+  overflow: hidden;
+  background: radial-gradient(circle at top right, var(--sidebar-bg), var(--bg-main));
+}
+
+.blob {
+  position: absolute;
+  width: 600px; height: 600px;
+  background: linear-gradient(135deg, var(--primary), #4c1d95);
+  filter: blur(120px);
+  border-radius: 50%;
+  opacity: 0.2;
+  animation: floatBlobs 25s infinite alternate;
+}
+
+@keyframes floatBlobs {
+  from { transform: translate(-10%, -10%) scale(1); }
+  to { transform: translate(10%, 10%) scale(1.1); }
+}
+
+/* =========================================
+   4. LOGIN & REGISTER PAGE WRAPPER
+   ========================================= */
+.login-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  box-sizing: border-box;
+}
+
+/* =========================================
+   5. SHARED GLASS CARD (The Fix!)
+   ========================================= */
+/* This targets BOTH class names so they look identical */
+.auth-container, 
+.register-container {
+  width: 100%;
+  max-width: 450px; /* Default width */
+  padding: 40px;
+  
+  /* The Dark Glass Effect */
+  background: rgba(4, 29, 49, 0.75); 
+  -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+
+  
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  
+  color: white;
+  position: relative;
+  z-index: 10;
+  text-align: center;
+}
+
+/* Make Register form wider automatically */
+.auth-container.wide,
+.register-container {
+  max-width: 600px;
+}
+
+/* HEADERS & TEXT */
+.auth-container h2, .register-container h2 {
+  color: white;
+  font-size: 2rem;
+  margin-top: 0;
+  margin-bottom: 5px;
+}
+
+.auth-container p, .register-container p {
+  color: #cbd5e1;
+  margin-bottom: 2rem;
+}
+
+/* =========================================
+   6. INPUTS & BUTTONS (Unified)
+   ========================================= */
+.auth-container input, .register-container input,
+.auth-container select, .register-container select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+  
+  /* Dark transparent background */
+  background: rgba(0, 0, 0, 0.3) !important; 
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px;
+  
+  color: white !important;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.auth-container input:focus, .register-container input:focus,
+.auth-container select:focus, .register-container select:focus {
+  border-color: var(--primary) !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.2);
+}
+
+.auth-container label, .register-container label {
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+  display: block;
+  text-align: left;
+}
+
+.primary-btn, .login-btn-cool {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 14px;
+  width: 100%;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 10px;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.primary-btn:hover, .login-btn-cool:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+/* DROPDOWN OPTIONS FIX */
+option {
+  background-color: #041d31;
+  color: white;
+}
+
+/* =========================================
+   7. DASHBOARD STYLES (Kept Original)
+   ========================================= */
+.app-layout { display: flex; height: 100vh; background: transparent; }
+.sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1rem 0; }
+.sidebar-header { padding: 0 1.5rem 1rem; margin-bottom: 2rem; font-size: 1.2rem; font-weight: bold; color: white; border-bottom: 1px solid var(--border); }
+.nav-item { padding: 0.8rem 1.5rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; color: var(--text-light); }
+.nav-item:hover, .nav-item.active { background: rgba(255, 255, 255, 0.05); color: white; border-left: 4px solid var(--primary); }
+.main-content { flex: 1; overflow-y: auto; padding: 2rem; }
+.profile-banner { text-align: center; margin-bottom: 3rem; background: linear-gradient(to bottom, rgba(4, 29, 49, 0.8) 50%, transparent 50%); padding-top: 2rem; border-radius: 8px; }
+.big-avatar { width: 100px; height: 100px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto; border: 4px solid var(--bg-main); box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 1200px; margin: 0 auto; }
+.info-card { background: var(--surface); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 12px; }
+.card-header { padding: 1rem; background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid var(--border); font-weight: 600; color: white; }
+.info-row { display: flex; justify-content: space-between; padding: 1rem; border-bottom: 1px solid var(--border); }
+.label { color: var(--text-light); } .value { color: var(--primary); font-weight: 600; text-decoration: none; }
+
+/* =========================================
+   8. DATA TABLE STYLES (Fixes Invisible Headers)
+   ========================================= */
+table {
+  width: 100%;
+  border-collapse: collapse; /* Removes gaps between cells */
+  margin-top: 10px;
+}
+
+thead {
+  background-color: rgba(255, 255, 255, 0.05); /* Slight highlight for header row */
+}
+
+th {
+  color: #000000; /* Light Gray Text for Headers */
+  font-weight: 600;
+  text-align: left;
+  padding: 15px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+td {
+  padding: 15px;
+  color: white; /* White text for data */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Faint line between rows */
+  font-size: 0.95rem;
+}
+
+/* Hover effect for rows */
+tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Subtle blue glow on hover */
+  cursor: default;
+}
+
+/* Action Buttons inside table (if you have them) */
+td button {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.btn-edit { background: #eab308; color: black; margin-right: 5px; }
+.btn-delete { background: #ef4444; color: white; }
