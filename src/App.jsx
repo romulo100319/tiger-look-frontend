@@ -33,4 +33,14 @@ function App() {
   );
 }
 
+function App() {
+  // 🛑 COMMENT THIS OUT TEMPORARILY
+  // useSecurity(); 
+
+  return (
+    <Routes>
+      {/* ... your routes ... */}
+    </Routes>
+  );
+}
 export default App;
