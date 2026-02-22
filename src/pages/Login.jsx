@@ -26,8 +26,12 @@ const Login = () => {
         
         console.log("Login successful! Token saved.");
         
-        // Redirect sa Dashboard
-        navigate('/dashboard');
+        // 🛑 THE FINAL FIX: Delay ng konti at Hard Reload
+        // Imbes na navigate(), gamitin ang window.location.href
+        // Ito ay para siguraduhin na mababasa ng App.jsx ang token mula sa simula.
+        setTimeout(() => {
+             window.location.href = '/dashboard';
+        }, 100);
       }
     } catch (err) {
       console.error(err);
