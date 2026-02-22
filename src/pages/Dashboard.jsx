@@ -13,15 +13,11 @@ const Dashboard = () => {
   const [courses, setCourses] = useState([]);      // All Available Courses
   const [myCourses, setMyCourses] = useState([]);  // Enrolled Courses
   const [grades, setGrades] = useState([]);        // Student Grades
+  const [announcements, setAnnouncements] = useState([]); // 📢 NEW: Announcements State
 
   // ADMIN STATES
   const [newCourse, setNewCourse] = useState({ course_code: '', course_name: '', credits: 3 });
   const [gradeForm, setGradeForm] = useState({ student_email: '', course_code: '', grade: '' });
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({
-    first_name: '', middle_name: '', last_name: '', suffix: '', gender: '', birthdate: ''
-});
 
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -29,39 +25,52 @@ const Dashboard = () => {
   // --- 1. FETCH DATA ---
   const fetchData = async () => {
     try {
+      // ✅ NOTE: Tinanggal na natin ang { withCredentials: true } 
+      // dahil ang 'App.jsx' interceptor na ang bahala sa Token.
+
       // Fetch User
-      const userRes = await axios.get(`${API_URL}/users/me`, { withCredentials: true });
+      const userRes = await axios.get(`${API_URL}/users/me`);
       setUser(userRes.data);
 
       // Fetch Enrolled Courses
-      const myRes = await axios.get(`${API_URL}/my-courses`, { withCredentials: true });
+      const myRes = await axios.get(`${API_URL}/my-courses`);
       setMyCourses(myRes.data);
 
       // Fetch All Courses
-      const allRes = await axios.get(`${API_URL}/courses`, { withCredentials: true });
+      const allRes = await axios.get(`${API_URL}/courses`);
       setCourses(allRes.data);
 
       // Fetch Grades
-      const gradesRes = await axios.get(`${API_URL}/my-grades`, { withCredentials: true });
+      const gradesRes = await axios.get(`${API_URL}/my-grades`);
       setGrades(gradesRes.data);
 
+      // 📢 Fetch Announcements (New)
+      try {
+        const annRes = await axios.get(`${API_URL}/announcements`);
+        setAnnouncements(annRes.data);
+      } catch (error) {
+        console.log("No announcements found (or table not created yet)");
+      }
+
     } catch (err) {
+      console.error(err);
       navigate('/login');
     }
-
   };
 
   useEffect(() => { fetchData(); }, [navigate]);
 
   // --- 2. ACTIONS ---
   const handleLogout = async () => {
-    await axios.post(`${API_URL}/auth/logout`);
+    // Clear Local Storage
+    localStorage.removeItem('token');
+    localStorage.removeItem('userInfo');
     navigate('/login');
   };
 
   const handleEnroll = async (courseId) => {
     try {
-      await axios.post(`${API_URL}/enroll`, { courseId }, { withCredentials: true });
+      await axios.post(`${API_URL}/enroll`, { courseId });
       alert("Enrolled successfully!");
       fetchData();
       setCourseTab('my'); 
@@ -74,7 +83,7 @@ const Dashboard = () => {
   const handleCreateCourse = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/courses`, newCourse, { withCredentials: true });
+      await axios.post(`${API_URL}/courses`, newCourse);
       alert("Course Created!");
       setNewCourse({ course_code: '', course_name: '', credits: 3 });
       fetchData();
@@ -87,7 +96,7 @@ const Dashboard = () => {
   const handleDeleteCourse = async (id) => {
     if(!confirm("Are you sure you want to delete this course?")) return;
     try {
-      await axios.delete(`${API_URL}/courses/${id}`, { withCredentials: true });
+      await axios.delete(`${API_URL}/courses/${id}`);
       fetchData();
     } catch (err) {
       alert("Failed to delete");
@@ -98,7 +107,7 @@ const Dashboard = () => {
   const handleAssignGrade = async (e) => {
       e.preventDefault();
       try {
-          await axios.post(`${API_URL}/grades`, gradeForm, { withCredentials: true });
+          await axios.post(`${API_URL}/grades`, gradeForm);
           alert("Grade Assigned Successfully!");
           setGradeForm({ student_email: '', course_code: '', grade: '' }); // Reset form
           fetchData(); // Refresh to see updates
@@ -124,28 +133,19 @@ const Dashboard = () => {
         <div className="sidebar-header">TIGERLOOK UNIVERSITY</div>
         
         <div className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
-          <span>👤 Profile</span>
+          <span>👤 Profile & Home</span>
         </div>
 
         <div className={`nav-item ${activeTab === 'assignments' ? 'active' : ''}`} onClick={() => setActiveTab('assignments')}>
-            <span> Assignments</span>
+            <span>📝 Assignments</span>
         </div>
         
         <div className={`nav-item ${activeTab === 'courses' ? 'active' : ''}`} onClick={() => setActiveTab('courses')}>
-          <span> Courses</span>
+          <span>📚 Courses</span>
         </div>
 
-        {/* NEW GRADES TAB */}
         <div className={`nav-item ${activeTab === 'grades' ? 'active' : ''}`} onClick={() => setActiveTab('grades')}>
-          <span>  Grades</span>
-        </div>
-        
-        <div className="nav-item">
-          <span>  Calendar</span>
-        </div>
-        
-        <div className="nav-item">
-          <span>  Messages</span>
+          <span>📊 Grades</span>
         </div>
 
         <div style={{ marginTop: 'auto' }}>
@@ -169,42 +169,68 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* --- VIEW 1: PROFILE GRID --- */}
+        {/* --- VIEW 1: PROFILE & ANNOUNCEMENTS --- */}
         {activeTab === 'profile' && (
-            <div className="info-grid">
-                <div className="info-card">
-                    <div className="card-header">Basic Information</div>
-                    <div className="info-row">
-                        <span className="label">Full Name</span>
-                        <span className="value">{fullName.toUpperCase()}</span>
-                    </div>
-                    <div className="info-row">
-                        <span className="label">Email Address</span>
-                        <span className="value">{user.email}</span>
-                    </div>
-                    <div className="info-row">
-                        <span className="label">Gender</span>
-                        <span className="value">{user.gender || 'Not specified'}</span>
-                    </div>
-                    <div className="info-row">
-                        <span className="label">Birthday</span>
-                        <span className="value">{user.birthdate ? new Date(user.birthdate).toLocaleDateString() : 'N/A'}</span>
-                    </div>
+            <div>
+                {/* 📢 ANNOUNCEMENT SECTION (NEW) */}
+                <div style={{ maxWidth: '1000px', margin: '0 auto 2rem auto', background: 'white', padding: '1.5rem', borderRadius: '10px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+                    <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '10px', color: '#2563eb' }}>
+                        📢 Campus Announcements
+                    </h3>
+                    
+                    {announcements.length === 0 ? (
+                        <p style={{ color: '#64748b', fontStyle: 'italic' }}>No new announcements posted.</p>
+                    ) : (
+                        <div style={{ display: 'grid', gap: '1rem' }}>
+                            {announcements.map((ann) => (
+                                <div key={ann.id} style={{ borderLeft: '4px solid #3b82f6', background: '#f8fafc', padding: '1rem', borderRadius: '0 4px 4px 0' }}>
+                                    <h4 style={{ margin: '0 0 5px 0', fontSize: '1.1rem' }}>{ann.title}</h4>
+                                    <p style={{ margin: '0 0 8px 0', color: '#334155', whiteSpace: 'pre-wrap' }}>{ann.content}</p>
+                                    <small style={{ color: '#94a3b8', fontSize: '0.8rem' }}>
+                                        Posted on: {new Date(ann.created_at).toLocaleDateString()}
+                                    </small>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                <div className="info-card">
-                    <div className="card-header">System Settings</div>
-                    <div className="info-row">
-                        <span className="label">Language</span>
-                        <span className="value">English (United States)</span>
+                {/* EXISTING PROFILE GRID */}
+                <div className="info-grid">
+                    <div className="info-card">
+                        <div className="card-header">Basic Information</div>
+                        <div className="info-row">
+                            <span className="label">Full Name</span>
+                            <span className="value">{fullName.toUpperCase()}</span>
+                        </div>
+                        <div className="info-row">
+                            <span className="label">Email Address</span>
+                            <span className="value">{user.email}</span>
+                        </div>
+                        <div className="info-row">
+                            <span className="label">Gender</span>
+                            <span className="value">{user.gender || 'Not specified'}</span>
+                        </div>
+                        <div className="info-row">
+                            <span className="label">Birthday</span>
+                            <span className="value">{user.birthdate ? new Date(user.birthdate).toLocaleDateString() : 'N/A'}</span>
+                        </div>
                     </div>
-                    <div className="info-row">
-                        <span className="label">Privacy Settings</span>
-                        <span className="value">Standard</span>
-                    </div>
-                     <div className="info-row">
-                        <span className="label">Notifications</span>
-                        <span className="value">Stream notifications</span>
+
+                    <div className="info-card">
+                        <div className="card-header">System Settings</div>
+                        <div className="info-row">
+                            <span className="label">Language</span>
+                            <span className="value">English (United States)</span>
+                        </div>
+                        <div className="info-row">
+                            <span className="label">Privacy Settings</span>
+                            <span className="value">Standard</span>
+                        </div>
+                         <div className="info-row">
+                            <span className="label">Notifications</span>
+                            <span className="value">Stream notifications</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -289,7 +315,7 @@ const Dashboard = () => {
             </div>
         )}
 
-        {/* --- VIEW 3: GRADES (NEW!) --- */}
+        {/* --- VIEW 3: GRADES --- */}
         {activeTab === 'grades' && (
             <div className="info-card" style={{ maxWidth: '1000px', margin: '0 auto' }}>
                 <div className="card-header">Academic Records & Grades</div>
