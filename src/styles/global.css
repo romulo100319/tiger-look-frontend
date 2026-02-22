@@ -239,3 +239,46 @@ td button {
 
 .btn-edit { background: #eab308; color: black; margin-right: 5px; }
 .btn-delete { background: #ef4444; color: white; }
+
+:root {
+  /* LIGHT MODE (Default) */
+  --primary: #2563eb;
+  --bg-color: #f3f4f6;
+  --sidebar-bg: #1e293b;
+  --text-main: #1e293b;
+  --text-secondary: #64748b;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --input-bg: #ffffff;
+}
+
+[data-theme='dark'] {
+  /* DARK MODE COLORS */
+  --primary: #3b82f6;
+  --bg-color: #0f172a;       /* Dark Blue/Black */
+  --sidebar-bg: #020617;      /* Darker Sidebar */
+  --text-main: #f1f5f9;       /* White Text */
+  --text-secondary: #94a3b8;  /* Light Gray */
+  --card-bg: #1e293b;         /* Dark Card */
+  --border-color: #334155;
+  --input-bg: #0f172a;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  transition: background-color 0.3s, color 0.3s; /* Smooth transition */
+}
+
+/* Update natin ang cards para sumunod sa theme */
+.info-card, .sidebar, .profile-banner {
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Specific overrides for Dark Mode inputs */
+[data-theme='dark'] input, 
+[data-theme='dark'] select {
+  background-color: var(--input-bg);
+  color: var(--text-main);
+  border-color: var(--border-color);
+}
