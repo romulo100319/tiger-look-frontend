@@ -8,7 +8,8 @@ const Dashboard = () => {
   // NAVIGATION & THEME
   const [activeTab, setActiveTab] = useState('home'); 
   const [courseTab, setCourseTab] = useState('my');
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark'); // 🌙 Theme State
+  // ✅ DEFAULT DARK MODE
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark'); 
 
   // DATA STATES
   const [courses, setCourses] = useState([]);
@@ -16,9 +17,16 @@ const Dashboard = () => {
   const [grades, setGrades] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
 
-  // PROFILE EDIT STATES
+  // PROFILE EDIT STATES (UPDATED FOR FULL PROFILE)
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ gender: '', birthdate: '' });
+  const [editForm, setEditForm] = useState({ 
+    first_name: '', 
+    middle_name: '', 
+    last_name: '', 
+    suffix: '', 
+    gender: '', 
+    birthdate: '' 
+  });
 
   // ADMIN STATES
   const [newCourse, setNewCourse] = useState({ course_code: '', course_name: '', credits: 3 });
@@ -42,8 +50,13 @@ const Dashboard = () => {
     try {
       const userRes = await axios.get(`${API_URL}/users/me`);
       setUser(userRes.data);
-      // Initialize edit form with current data
+      
+      // ✅ INITIALIZE FORM WITH ALL USER DATA
       setEditForm({ 
+        first_name: userRes.data.first_name || '',
+        middle_name: userRes.data.middle_name || '',
+        last_name: userRes.data.last_name || '',
+        suffix: userRes.data.suffix || '',
         gender: userRes.data.gender || 'Not specified', 
         birthdate: userRes.data.birthdate ? userRes.data.birthdate.split('T')[0] : '' 
       });
@@ -79,14 +92,15 @@ const Dashboard = () => {
     navigate('/login');
   };
 
-  // UPDATE PROFILE ACTION
+  // UPDATE PROFILE ACTION (FULL UPDATE)
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-        await axios.put(`${API_URL}/users/update-profile`, editForm);
+        const res = await axios.put(`${API_URL}/users/update-profile`, editForm);
         alert("Profile Updated Successfully!");
+        setUser(res.data.user); // Update local user state immediately
         setIsEditing(false);
-        fetchData(); // Refresh data
+        fetchData(); // Refresh data to be sure
     } catch (err) {
         alert("Failed to update profile");
     }
@@ -155,6 +169,15 @@ const Dashboard = () => {
     borderRadius: '10px', 
     boxShadow: '0 2px 5px rgba(0,0,0,0.05)' 
   };
+  
+  const inputStyle = {
+      padding: '8px', 
+      borderRadius: '4px', 
+      border: '1px solid var(--border-color)', 
+      width: '100%', 
+      background: 'var(--input-bg)',
+      color: 'var(--text-main)'
+  };
 
   return (
     <div className="app-layout">
@@ -194,7 +217,7 @@ const Dashboard = () => {
       </div>
 
       {/* 2. MAIN CONTENT AREA */}
-      <div className="main-content" style={{ background: 'var(--bg-color)' }}>
+      <div className="main-content" style={{ background: 'var(--bg-main)' }}>
         
         {/* --- VIEW 1: HOME (ANNOUNCEMENTS) --- */}
         {activeTab === 'home' && (
@@ -205,14 +228,14 @@ const Dashboard = () => {
                     </h1>
                     
                     {announcements.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)', background: 'var(--bg-color)', borderRadius: '8px' }}>
+                        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)', background: 'var(--bg-main)', borderRadius: '8px' }}>
                             <p>🎉 Welcome to Tiger Look Portal!</p>
                             <p style={{ fontSize: '1rem' }}>Sir Doncoy Gwapings mo!</p>
                         </div>
                     ) : (
                         <div style={{ display: 'grid', gap: '1.5rem' }}>
                             {announcements.map((ann) => (
-                                <div key={ann.id} style={{ borderLeft: '5px solid var(--primary)', background: 'var(--bg-color)', padding: '1.5rem', borderRadius: '0 8px 8px 0' }}>
+                                <div key={ann.id} style={{ borderLeft: '5px solid var(--primary)', background: 'var(--bg-main)', padding: '1.5rem', borderRadius: '0 8px 8px 0' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
                                         <h3 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.2rem' }}>{ann.title}</h3>
                                         <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', background: 'var(--card-bg)', border: '1px solid var(--border-color)', padding: '2px 8px', borderRadius: '10px' }}>
@@ -228,7 +251,7 @@ const Dashboard = () => {
             </div>
         )}
 
-        {/* --- VIEW 2: PROFILE (EDITABLE) --- */}
+        {/* --- VIEW 2: PROFILE (FULLY EDITABLE) --- */}
         {activeTab === 'profile' && (
             <div>
                 <div className="profile-banner" style={{ background: 'linear-gradient(135deg, var(--primary), #1e293b)' }}>
@@ -244,7 +267,7 @@ const Dashboard = () => {
                 <div className="info-grid">
                     <div className="info-card" style={cardStyle}>
                         <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span>Basic Information</span>
+                            <span>Personal Information</span>
                             {/* ✏️ EDIT BUTTON */}
                             {!isEditing && (
                                 <button onClick={() => setIsEditing(true)} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 'bold' }}>
@@ -256,17 +279,32 @@ const Dashboard = () => {
                         {/* EDIT FORM */}
                         {isEditing ? (
                             <form onSubmit={handleUpdateProfile}>
-                                <div className="info-row">
-                                    <span className="label">Full Name</span>
-                                    <span className="value" style={{color: 'var(--text-secondary)'}}>{fullName.toUpperCase()} (Locked)</span>
+                                {/* NAME FIELDS */}
+                                <div className="info-row" style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                                    <div style={{flex: 1}}>
+                                        <label className="label" style={{fontSize: '0.8rem'}}>First Name</label>
+                                        <input style={inputStyle} value={editForm.first_name} onChange={(e) => setEditForm({...editForm, first_name: e.target.value})} required />
+                                    </div>
+                                    <div style={{flex: 1}}>
+                                        <label className="label" style={{fontSize: '0.8rem'}}>Last Name</label>
+                                        <input style={inputStyle} value={editForm.last_name} onChange={(e) => setEditForm({...editForm, last_name: e.target.value})} required />
+                                    </div>
                                 </div>
+                                <div className="info-row" style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                                    <div style={{flex: 1}}>
+                                        <label className="label" style={{fontSize: '0.8rem'}}>Middle Name</label>
+                                        <input style={inputStyle} value={editForm.middle_name} onChange={(e) => setEditForm({...editForm, middle_name: e.target.value})} />
+                                    </div>
+                                    <div style={{width: '80px'}}>
+                                        <label className="label" style={{fontSize: '0.8rem'}}>Suffix</label>
+                                        <input style={inputStyle} value={editForm.suffix} onChange={(e) => setEditForm({...editForm, suffix: e.target.value})} placeholder="Jr." />
+                                    </div>
+                                </div>
+
+                                {/* OTHER FIELDS */}
                                 <div className="info-row">
                                     <span className="label">Gender</span>
-                                    <select 
-                                        value={editForm.gender} 
-                                        onChange={(e) => setEditForm({...editForm, gender: e.target.value})}
-                                        style={{ padding: '5px', borderRadius: '4px', border: '1px solid var(--border-color)' }}
-                                    >
+                                    <select style={inputStyle} value={editForm.gender} onChange={(e) => setEditForm({...editForm, gender: e.target.value})}>
                                         <option value="Not specified">Select Gender</option>
                                         <option value="Male">Male</option>
                                         <option value="Female">Female</option>
@@ -275,16 +313,12 @@ const Dashboard = () => {
                                 </div>
                                 <div className="info-row">
                                     <span className="label">Birthday</span>
-                                    <input 
-                                        type="date" 
-                                        value={editForm.birthdate} 
-                                        onChange={(e) => setEditForm({...editForm, birthdate: e.target.value})}
-                                        style={{ padding: '5px', borderRadius: '4px', border: '1px solid var(--border-color)' }}
-                                    />
+                                    <input type="date" style={inputStyle} value={editForm.birthdate} onChange={(e) => setEditForm({...editForm, birthdate: e.target.value})} />
                                 </div>
-                                <div style={{ marginTop: '1rem', display: 'flex', gap: '10px' }}>
-                                    <button type="submit" className="primary-btn" style={{ padding: '8px 16px' }}>Save Changes</button>
+
+                                <div style={{ marginTop: '1rem', display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                                     <button type="button" onClick={() => setIsEditing(false)} style={{ padding: '8px 16px', background: 'transparent', border: '1px solid var(--text-secondary)', color: 'var(--text-secondary)', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
+                                    <button type="submit" className="primary-btn" style={{ padding: '8px 24px', width: 'auto' }}>Save Changes</button>
                                 </div>
                             </form>
                         ) : (
@@ -346,20 +380,20 @@ const Dashboard = () => {
 
                     <div style={{ padding: '2rem' }}>
                         {isAdmin && courseTab === 'all' && (
-                            <div style={{ background: 'var(--bg-color)', padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem', border: '1px dashed var(--border-color)' }}>
+                            <div style={{ background: 'var(--bg-main)', padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem', border: '1px dashed var(--border-color)' }}>
                                 <h4 style={{ margin: '0 0 1rem 0', color: 'var(--primary)' }}>Admin: Add New Course</h4>
                                 <form onSubmit={handleCreateCourse} style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
                                     <div style={{flex: 1}}>
                                         <label style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>Code</label>
-                                        <input placeholder="CS101" value={newCourse.course_code} onChange={e => setNewCourse({...newCourse, course_code: e.target.value})} style={{marginBottom: 0, width: '100%', padding: '8px', border: '1px solid var(--border-color)', borderRadius: '4px'}} required />
+                                        <input placeholder="CS101" value={newCourse.course_code} onChange={e => setNewCourse({...newCourse, course_code: e.target.value})} style={{...inputStyle, marginBottom: 0}} required />
                                     </div>
                                     <div style={{flex: 2}}>
                                         <label style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>Course Name</label>
-                                        <input placeholder="Intro to Programming" value={newCourse.course_name} onChange={e => setNewCourse({...newCourse, course_name: e.target.value})} style={{marginBottom: 0, width: '100%', padding: '8px', border: '1px solid var(--border-color)', borderRadius: '4px'}} required />
+                                        <input placeholder="Intro to Programming" value={newCourse.course_name} onChange={e => setNewCourse({...newCourse, course_name: e.target.value})} style={{...inputStyle, marginBottom: 0}} required />
                                     </div>
                                     <div style={{width: '80px'}}>
                                         <label style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>Credits</label>
-                                        <input type="number" placeholder="3" value={newCourse.credits} onChange={e => setNewCourse({...newCourse, credits: e.target.value})} style={{marginBottom: 0, width: '100%', padding: '8px', border: '1px solid var(--border-color)', borderRadius: '4px'}} required />
+                                        <input type="number" placeholder="3" value={newCourse.credits} onChange={e => setNewCourse({...newCourse, credits: e.target.value})} style={{...inputStyle, marginBottom: 0}} required />
                                     </div>
                                     <button type="submit" className="primary-btn" style={{width: 'auto', padding: '0 20px', height: '42px'}}>Add</button>
                                 </form>
@@ -368,7 +402,7 @@ const Dashboard = () => {
 
                         <table style={{ width: '100%', borderCollapse: 'collapse', color: 'var(--text-main)' }}>
                             <thead>
-                                <tr style={{ background: 'var(--bg-color)', textAlign: 'left' }}>
+                                <tr style={{ background: 'var(--bg-main)', textAlign: 'left' }}>
                                     <th style={{ padding: '12px', borderBottom: '2px solid var(--border-color)' }}>Code</th>
                                     <th style={{ padding: '12px', borderBottom: '2px solid var(--border-color)' }}>Course Name</th>
                                     <th style={{ padding: '12px', borderBottom: '2px solid var(--border-color)' }}>Credits</th>
@@ -413,20 +447,20 @@ const Dashboard = () => {
                     <div className="card-header">Academic Records & Grades</div>
                     
                     {isAdmin && (
-                        <div style={{padding: '1.5rem', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-color)', borderRadius: '8px', marginBottom: '1rem'}}>
+                        <div style={{padding: '1.5rem', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-main)', borderRadius: '8px', marginBottom: '1rem'}}>
                             <h4 style={{ margin: '0 0 1rem 0', color: 'var(--primary)' }}>Admin: Assign Grade</h4>
                             <form onSubmit={handleAssignGrade} style={{display: 'flex', gap: '10px', alignItems: 'flex-end'}}>
                                 <div style={{flex: 2}}>
                                     <label style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>Student Email</label>
-                                    <input placeholder="student@example.com" value={gradeForm.student_email} onChange={e=>setGradeForm({...gradeForm, student_email: e.target.value})} style={{marginBottom: 0, width: '100%', padding: '8px', border: '1px solid var(--border-color)', borderRadius: '4px'}} required />
+                                    <input placeholder="student@example.com" value={gradeForm.student_email} onChange={e=>setGradeForm({...gradeForm, student_email: e.target.value})} style={{...inputStyle, marginBottom: 0}} required />
                                 </div>
                                 <div style={{flex: 1}}>
                                     <label style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>Course Code</label>
-                                    <input placeholder="CS101" value={gradeForm.course_code} onChange={e=>setGradeForm({...gradeForm, course_code: e.target.value})} style={{marginBottom: 0, width: '100%', padding: '8px', border: '1px solid var(--border-color)', borderRadius: '4px'}} required />
+                                    <input placeholder="CS101" value={gradeForm.course_code} onChange={e=>setGradeForm({...gradeForm, course_code: e.target.value})} style={{...inputStyle, marginBottom: 0}} required />
                                 </div>
                                 <div style={{flex: 1}}>
                                     <label style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>Grade</label>
-                                    <input placeholder="A / 95" value={gradeForm.grade} onChange={e=>setGradeForm({...gradeForm, grade: e.target.value})} style={{marginBottom: 0, width: '100%', padding: '8px', border: '1px solid var(--border-color)', borderRadius: '4px'}} required />
+                                    <input placeholder="A / 95" value={gradeForm.grade} onChange={e=>setGradeForm({...gradeForm, grade: e.target.value})} style={{...inputStyle, marginBottom: 0}} required />
                                 </div>
                                 <button type="submit" className="primary-btn" style={{width: 'auto', padding: '0 20px', height: '42px'}}>Assign</button>
                             </form>
@@ -437,7 +471,7 @@ const Dashboard = () => {
                         {grades.length === 0 ? <p style={{padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)'}}>No grades recorded yet.</p> : (
                             <table style={{width: '100%', borderCollapse: 'collapse', color: 'var(--text-main)'}}>
                                 <thead>
-                                    <tr style={{textAlign: 'left', borderBottom: '2px solid var(--border-color)', background: 'var(--bg-color)'}}>
+                                    <tr style={{textAlign: 'left', borderBottom: '2px solid var(--border-color)', background: 'var(--bg-main)'}}>
                                         <th style={{padding: '12px'}}>Course Code</th>
                                         <th style={{padding: '12px'}}>Course Name</th>
                                         <th style={{padding: '12px'}}>Grade</th>
