@@ -188,20 +188,20 @@ const Dashboard = () => {
         
         {/* 🏠 HOME TAB */}
         <div className={`nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')}>
-          <span>🏠 Home</span>
+          <span> Home</span>
         </div>
 
         {/* 👤 PROFILE TAB */}
         <div className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
-          <span>👤 Profile</span>
+          <span> Profile</span>
         </div>
         
         <div className={`nav-item ${activeTab === 'courses' ? 'active' : ''}`} onClick={() => setActiveTab('courses')}>
-          <span>📚 Courses</span>
+          <span> Courses</span>
         </div>
 
         <div className={`nav-item ${activeTab === 'grades' ? 'active' : ''}`} onClick={() => setActiveTab('grades')}>
-          <span>📊 Grades</span>
+          <span> Grades</span>
         </div>
 
         <div style={{ marginTop: 'auto' }}>
@@ -211,7 +211,7 @@ const Dashboard = () => {
             </div>
 
             <div className="nav-item" onClick={handleLogout} style={{ color: '#ef4444' }}>
-                <span>🚪 Sign Out</span>
+                <span> Sign Out</span>
             </div>
         </div>
       </div>
@@ -271,7 +271,7 @@ const Dashboard = () => {
                             {/* ✏️ EDIT BUTTON */}
                             {!isEditing && (
                                 <button onClick={() => setIsEditing(true)} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 'bold' }}>
-                                    ✏️ Edit Info
+                                    Edit Info
                                 </button>
                             )}
                         </div>
