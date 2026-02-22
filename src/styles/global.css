@@ -1,15 +1,32 @@
 /* =========================================
-   1. CORE VARIABLES (TIGERLOOK DARK THEME)
+   1. CORE VARIABLES (THEME SYSTEM)
    ========================================= */
 :root {
-  --sidebar-bg: #041d31;        /* Deep Navy */
-  --bg-main: #020d17;           /* Midnight Blue (Background) */
-  --primary: #2563eb;           /* Bright Blue */
-  --sidebar-text: #e2e8f0;      /* Light Text */
-  --surface: rgba(255, 255, 255, 0.03); /* Glass Effect */
-  --text-main: #f1f5f9;         /* White-ish Text */
-  --text-light: #94a3b8;        /* Gray Text */
-  --border: rgba(255, 255, 255, 0.1); /* Subtle Border */
+  /* LIGHT MODE (Default) */
+  --primary: #2563eb;
+  --bg-main: #f3f4f6;          /* Light Gray Background */
+  --sidebar-bg: #1e293b;       /* Dark Sidebar (Standard for dashboards) */
+  --sidebar-text: #e2e8f0;     /* Light Text for Sidebar */
+  --text-main: #1e293b;        /* Dark Text */
+  --text-secondary: #64748b;   /* Gray Text */
+  --card-bg: #ffffff;          /* White Card */
+  --border-color: #e2e8f0;
+  --input-bg: #ffffff;
+  --surface: #ffffff;          /* Standard Surface */
+}
+
+[data-theme='dark'] {
+  /* DARK MODE COLORS */
+  --primary: #3b82f6;          /* Lighter Blue */
+  --bg-main: #0f172a;          /* Deep Dark Blue Background */
+  --sidebar-bg: #020617;       /* Almost Black Sidebar */
+  --sidebar-text: #f1f5f9;
+  --text-main: #f8fafc;        /* White Text */
+  --text-secondary: #94a3b8;   /* Light Gray Text */
+  --card-bg: #1e293b;          /* Dark Blue Card */
+  --border-color: #334155;     /* Dark Borders */
+  --input-bg: #0f172a;         /* Dark Input Fields */
+  --surface: rgba(30, 41, 59, 0.7); /* Glass-like surface for dark mode */
 }
 
 /* =========================================
@@ -20,8 +37,9 @@ body {
   margin: 0;
   background-color: var(--bg-main);
   color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
   
-  /* CRITICAL FIX: Allows scrolling if content is too tall */
+  /* CRITICAL FIX: Allows scrolling */
   height: 100vh;
   overflow-y: auto; 
 }
@@ -33,9 +51,10 @@ body {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  z-index: -1; /* Stays behind everything */
+  z-index: -1; 
   overflow: hidden;
-  background: radial-gradient(circle at top right, var(--sidebar-bg), var(--bg-main));
+  /* Dark gradient always for login page background */
+  background: radial-gradient(circle at top right, #041d31, #020d17);
 }
 
 .blob {
@@ -67,21 +86,19 @@ body {
 }
 
 /* =========================================
-   5. SHARED GLASS CARD (The Fix!)
+   5. SHARED GLASS CARD (Auth Pages)
    ========================================= */
-/* This targets BOTH class names so they look identical */
 .auth-container, 
 .register-container {
   width: 100%;
-  max-width: 450px; /* Default width */
+  max-width: 450px;
   padding: 40px;
   
-  /* The Dark Glass Effect */
+  /* Always Dark Glass for Login/Register */
   background: rgba(4, 29, 49, 0.75); 
   -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
 
-  
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -92,13 +109,11 @@ body {
   text-align: center;
 }
 
-/* Make Register form wider automatically */
 .auth-container.wide,
 .register-container {
   max-width: 600px;
 }
 
-/* HEADERS & TEXT */
 .auth-container h2, .register-container h2 {
   color: white;
   font-size: 2rem;
@@ -112,7 +127,7 @@ body {
 }
 
 /* =========================================
-   6. INPUTS & BUTTONS (Unified)
+   6. INPUTS & BUTTONS (Auth Pages)
    ========================================= */
 .auth-container input, .register-container input,
 .auth-container select, .register-container select {
@@ -147,7 +162,7 @@ body {
   text-align: left;
 }
 
-.primary-btn, .login-btn-cool {
+.primary-btn {
   background: var(--primary);
   color: white;
   border: none;
@@ -161,121 +176,158 @@ body {
   transition: transform 0.2s, background 0.2s;
 }
 
-.primary-btn:hover, .login-btn-cool:hover {
+.primary-btn:hover {
   background: #1d4ed8;
   transform: translateY(-2px);
 }
 
-/* DROPDOWN OPTIONS FIX */
 option {
-  background-color: #041d31;
-  color: white;
+  background-color: var(--card-bg);
+  color: var(--text-main);
 }
 
 /* =========================================
-   7. DASHBOARD STYLES (Kept Original)
+   7. DASHBOARD STYLES (Theme Aware)
    ========================================= */
 .app-layout { display: flex; height: 100vh; background: transparent; }
-.sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1rem 0; }
-.sidebar-header { padding: 0 1.5rem 1rem; margin-bottom: 2rem; font-size: 1.2rem; font-weight: bold; color: white; border-bottom: 1px solid var(--border); }
-.nav-item { padding: 0.8rem 1.5rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; color: var(--text-light); }
-.nav-item:hover, .nav-item.active { background: rgba(255, 255, 255, 0.05); color: white; border-left: 4px solid var(--primary); }
-.main-content { flex: 1; overflow-y: auto; padding: 2rem; }
-.profile-banner { text-align: center; margin-bottom: 3rem; background: linear-gradient(to bottom, rgba(4, 29, 49, 0.8) 50%, transparent 50%); padding-top: 2rem; border-radius: 8px; }
-.big-avatar { width: 100px; height: 100px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto; border: 4px solid var(--bg-main); box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); }
-.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 1200px; margin: 0 auto; }
-.info-card { background: var(--surface); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 12px; }
-.card-header { padding: 1rem; background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid var(--border); font-weight: 600; color: white; }
-.info-row { display: flex; justify-content: space-between; padding: 1rem; border-bottom: 1px solid var(--border); }
-.label { color: var(--text-light); } .value { color: var(--primary); font-weight: 600; text-decoration: none; }
+
+.sidebar { 
+  width: 260px; 
+  background: var(--sidebar-bg); 
+  border-right: 1px solid var(--border-color); 
+  display: flex; 
+  flex-direction: column; 
+  padding: 1rem 0; 
+  transition: background-color 0.3s ease;
+}
+
+.sidebar-header { 
+  padding: 0 1.5rem 1rem; 
+  margin-bottom: 2rem; 
+  font-size: 1.2rem; 
+  font-weight: bold; 
+  color: var(--sidebar-text); 
+  border-bottom: 1px solid rgba(255,255,255,0.1); 
+}
+
+.nav-item { 
+  padding: 0.8rem 1.5rem; 
+  cursor: pointer; 
+  transition: all 0.2s; 
+  display: flex; 
+  align-items: center; 
+  gap: 10px; 
+  color: var(--text-secondary); 
+}
+
+.nav-item:hover, .nav-item.active { 
+  background: rgba(255, 255, 255, 0.05); 
+  color: var(--sidebar-text); 
+  border-left: 4px solid var(--primary); 
+}
+
+.main-content { 
+  flex: 1; 
+  overflow-y: auto; 
+  padding: 2rem; 
+  background: var(--bg-main);
+}
+
+.profile-banner { 
+  text-align: center; 
+  margin-bottom: 3rem; 
+  background: linear-gradient(to bottom, var(--sidebar-bg) 50%, transparent 50%); 
+  padding-top: 2rem; 
+  border-radius: 8px; 
+}
+
+.big-avatar { 
+  width: 100px; height: 100px; 
+  background: var(--primary); 
+  color: white; 
+  border-radius: 50%; 
+  display: flex; align-items: center; justify-content: center; 
+  font-size: 2.5rem; 
+  margin: 0 auto; 
+  border: 4px solid var(--bg-main); 
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); 
+}
+
+.info-grid { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 2rem; 
+  max-width: 1200px; 
+  margin: 0 auto; 
+}
+
+.info-card { 
+  background: var(--card-bg); 
+  border: 1px solid var(--border-color); 
+  border-radius: 12px; 
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card-header { 
+  padding: 1rem; 
+  background: rgba(0, 0, 0, 0.03); 
+  border-bottom: 1px solid var(--border-color); 
+  font-weight: 600; 
+  color: var(--text-main); 
+}
+
+/* Adjust header for dark mode */
+[data-theme='dark'] .card-header {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.info-row { 
+  display: flex; 
+  justify-content: space-between; 
+  padding: 1rem; 
+  border-bottom: 1px solid var(--border-color); 
+}
+
+.label { color: var(--text-secondary); } 
+.value { color: var(--text-main); font-weight: 600; }
 
 /* =========================================
-   8. DATA TABLE STYLES (Fixes Invisible Headers)
+   8. DATA TABLE STYLES
    ========================================= */
 table {
   width: 100%;
-  border-collapse: collapse; /* Removes gaps between cells */
+  border-collapse: collapse;
   margin-top: 10px;
 }
 
 thead {
-  background-color: rgba(255, 255, 255, 0.05); /* Slight highlight for header row */
+  background-color: var(--bg-main);
 }
 
 th {
-  color: #000000; /* Light Gray Text for Headers */
+  color: var(--text-secondary);
   font-weight: 600;
   text-align: left;
   padding: 15px;
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid var(--border-color);
 }
 
 td {
   padding: 15px;
-  color: white; /* White text for data */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Faint line between rows */
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-color);
   font-size: 0.95rem;
 }
 
-/* Hover effect for rows */
 tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.1); /* Subtle blue glow on hover */
-  cursor: default;
+  background-color: rgba(37, 99, 235, 0.05); /* Slight blue tint on hover */
 }
 
-/* Action Buttons inside table (if you have them) */
-td button {
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: bold;
-  transition: 0.2s;
-}
-
-.btn-edit { background: #eab308; color: black; margin-right: 5px; }
-.btn-delete { background: #ef4444; color: white; }
-
-:root {
-  /* LIGHT MODE (Default) */
-  --primary: #2563eb;
-  --bg-color: #f3f4f6;
-  --sidebar-bg: #1e293b;
-  --text-main: #1e293b;
-  --text-secondary: #64748b;
-  --card-bg: #ffffff;
-  --border-color: #e2e8f0;
-  --input-bg: #ffffff;
-}
-
-[data-theme='dark'] {
-  /* DARK MODE COLORS */
-  --primary: #3b82f6;
-  --bg-color: #0f172a;       /* Dark Blue/Black */
-  --sidebar-bg: #020617;      /* Darker Sidebar */
-  --text-main: #f1f5f9;       /* White Text */
-  --text-secondary: #94a3b8;  /* Light Gray */
-  --card-bg: #1e293b;         /* Dark Card */
-  --border-color: #334155;
-  --input-bg: #0f172a;
-}
-
-body {
-  background-color: var(--bg-color);
-  color: var(--text-main);
-  transition: background-color 0.3s, color 0.3s; /* Smooth transition */
-}
-
-/* Update natin ang cards para sumunod sa theme */
-.info-card, .sidebar, .profile-banner {
-  transition: background-color 0.3s, border-color 0.3s;
-}
-
-/* Specific overrides for Dark Mode inputs */
+/* Specific overrides for Dark Mode inputs (Inside Dashboard) */
 [data-theme='dark'] input, 
 [data-theme='dark'] select {
   background-color: var(--input-bg);

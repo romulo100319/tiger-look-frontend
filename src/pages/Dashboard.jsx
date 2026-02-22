@@ -8,7 +8,7 @@ const Dashboard = () => {
   // NAVIGATION & THEME
   const [activeTab, setActiveTab] = useState('home'); 
   const [courseTab, setCourseTab] = useState('my');
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light'); // 🌙 Theme State
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark'); // 🌙 Theme State
 
   // DATA STATES
   const [courses, setCourses] = useState([]);
