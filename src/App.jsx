@@ -1,12 +1,10 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import axios from 'axios'; // ⚠️ IMPORTANTE: Need ito para sa interceptor
+import axios from 'axios'; 
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import './styles/global.css';
 
-// 👇👇👇 THE FIX: AXIOS INTERCEPTOR 👇👇👇
-// Ito ang magsasabit ng Token sa bawat request papuntang backend
 axios.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -19,7 +17,6 @@ axios.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-// 👆👆👆 END OF FIX 👆👆👆
 
 const ProtectedRoute = ({ children }) => {
   // ✅ FIX: Check kung may token, hindi lang userInfo
