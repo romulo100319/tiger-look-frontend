@@ -6,7 +6,6 @@ const Dashboard = () => {
   const [user, setUser] = useState(null);
   
   // NAVIGATION TABS
-  // ✅ DEFAULT IS NOW 'home' (Announcements)
   const [activeTab, setActiveTab] = useState('home'); 
   const [courseTab, setCourseTab] = useState('my');
 
@@ -149,29 +148,20 @@ const Dashboard = () => {
       {/* 2. MAIN CONTENT AREA */}
       <div className="main-content">
         
-        {/* HEADER BANNER (Laging visible) */}
-        <div className="profile-banner">
-          <div className="big-avatar">
-            {fullName.charAt(0).toUpperCase()}
-          </div>
-          <div className="profile-name">{fullName}</div>
-          <div className="profile-id">
-             ID: {user.id.substring(0, 8).toUpperCase()} | {isAdmin ? 'ADMINISTRATOR' : 'STUDENT'}
-          </div>
-        </div>
+        {/* ❌ TINANGGAL KO NA DITO YUNG BANNER PARA DI LUMABAS SA LAHAT */}
 
         {/* --- VIEW 1: HOME (ANNOUNCEMENTS ONLY) --- */}
         {activeTab === 'home' && (
             <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
                 <div style={{ background: 'white', padding: '2rem', borderRadius: '10px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
-                    <h2 style={{ margin: '0 0 1.5rem 0', display: 'flex', alignItems: 'center', gap: '10px', color: '#2563eb', borderBottom: '2px solid #f1f5f9', paddingBottom: '1rem' }}>
-                        📢 Latest Announcements
-                    </h2>
+                    <h1 style={{ margin: '0 0 1.5rem 0', display: 'flex', alignItems: 'center', gap: '10px', color: '#2563eb', borderBottom: '2px solid #f1f5f9', paddingBottom: '1rem' }}>
+                        📢 Announcements
+                    </h1>
                     
                     {announcements.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b', background: '#f8fafc', borderRadius: '8px' }}>
                             <p>🎉 Welcome to Tiger Look Portal!</p>
-                            <p style={{ fontSize: '0.9rem' }}>No new announcements at the moment.</p>
+                            <p style={{ fontSize: '1rem' }}>Sir Doncoy Gwapings mo!</p>
                         </div>
                     ) : (
                         <div style={{ display: 'grid', gap: '1.5rem' }}>
@@ -194,40 +184,53 @@ const Dashboard = () => {
 
         {/* --- VIEW 2: PROFILE (DETAILS ONLY) --- */}
         {activeTab === 'profile' && (
-            <div className="info-grid">
-                <div className="info-card">
-                    <div className="card-header">Basic Information</div>
-                    <div className="info-row">
-                        <span className="label">Full Name</span>
-                        <span className="value">{fullName.toUpperCase()}</span>
+            <div>
+                {/* ✅ NILIPAT KO DITO ANG BANNER PARA SA PROFILE TAB LANG */}
+                <div className="profile-banner">
+                    <div className="big-avatar">
+                        {fullName.charAt(0).toUpperCase()}
                     </div>
-                    <div className="info-row">
-                        <span className="label">Email Address</span>
-                        <span className="value">{user.email}</span>
-                    </div>
-                    <div className="info-row">
-                        <span className="label">Gender</span>
-                        <span className="value">{user.gender || 'Not specified'}</span>
-                    </div>
-                    <div className="info-row">
-                        <span className="label">Birthday</span>
-                        <span className="value">{user.birthdate ? new Date(user.birthdate).toLocaleDateString() : 'N/A'}</span>
+                    <div className="profile-name">{fullName}</div>
+                    <div className="profile-id">
+                        ID: {user.id.substring(0, 8).toUpperCase()} | {isAdmin ? 'ADMINISTRATOR' : 'STUDENT'}
                     </div>
                 </div>
 
-                <div className="info-card">
-                    <div className="card-header">System Settings</div>
-                    <div className="info-row">
-                        <span className="label">Language</span>
-                        <span className="value">English (United States)</span>
-                    </div>
-                    <div className="info-row">
-                        <span className="label">Privacy Settings</span>
-                        <span className="value">Standard</span>
-                    </div>
+                <div className="info-grid">
+                    <div className="info-card">
+                        <div className="card-header">Basic Information</div>
                         <div className="info-row">
-                        <span className="label">Notifications</span>
-                        <span className="value">Stream notifications</span>
+                            <span className="label">Full Name</span>
+                            <span className="value">{fullName.toUpperCase()}</span>
+                        </div>
+                        <div className="info-row">
+                            <span className="label">Email Address</span>
+                            <span className="value">{user.email}</span>
+                        </div>
+                        <div className="info-row">
+                            <span className="label">Gender</span>
+                            <span className="value">{user.gender || 'Not specified'}</span>
+                        </div>
+                        <div className="info-row">
+                            <span className="label">Birthday</span>
+                            <span className="value">{user.birthdate ? new Date(user.birthdate).toLocaleDateString() : 'N/A'}</span>
+                        </div>
+                    </div>
+
+                    <div className="info-card">
+                        <div className="card-header">System Settings</div>
+                        <div className="info-row">
+                            <span className="label">Language</span>
+                            <span className="value">English (United States)</span>
+                        </div>
+                        <div className="info-row">
+                            <span className="label">Privacy Settings</span>
+                            <span className="value">Standard</span>
+                        </div>
+                            <div className="info-row">
+                            <span className="label">Notifications</span>
+                            <span className="value">Stream notifications</span>
+                        </div>
                     </div>
                 </div>
             </div>
