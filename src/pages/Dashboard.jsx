@@ -6,14 +6,15 @@ const Dashboard = () => {
   const [user, setUser] = useState(null);
   
   // NAVIGATION TABS
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile', 'courses', 'grades'
-  const [courseTab, setCourseTab] = useState('my');      // 'my' vs 'all'
+  // ✅ DEFAULT IS NOW 'home' (Announcements)
+  const [activeTab, setActiveTab] = useState('home'); 
+  const [courseTab, setCourseTab] = useState('my');
 
   // DATA STATES
-  const [courses, setCourses] = useState([]);      // All Available Courses
-  const [myCourses, setMyCourses] = useState([]);  // Enrolled Courses
-  const [grades, setGrades] = useState([]);        // Student Grades
-  const [announcements, setAnnouncements] = useState([]); // 📢 NEW: Announcements State
+  const [courses, setCourses] = useState([]);
+  const [myCourses, setMyCourses] = useState([]);
+  const [grades, setGrades] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
 
   // ADMIN STATES
   const [newCourse, setNewCourse] = useState({ course_code: '', course_name: '', credits: 3 });
@@ -25,31 +26,23 @@ const Dashboard = () => {
   // --- 1. FETCH DATA ---
   const fetchData = async () => {
     try {
-      // ✅ NOTE: Tinanggal na natin ang { withCredentials: true } 
-      // dahil ang 'App.jsx' interceptor na ang bahala sa Token.
-
-      // Fetch User
       const userRes = await axios.get(`${API_URL}/users/me`);
       setUser(userRes.data);
 
-      // Fetch Enrolled Courses
       const myRes = await axios.get(`${API_URL}/my-courses`);
       setMyCourses(myRes.data);
 
-      // Fetch All Courses
       const allRes = await axios.get(`${API_URL}/courses`);
       setCourses(allRes.data);
 
-      // Fetch Grades
       const gradesRes = await axios.get(`${API_URL}/my-grades`);
       setGrades(gradesRes.data);
 
-      // 📢 Fetch Announcements (New)
       try {
         const annRes = await axios.get(`${API_URL}/announcements`);
         setAnnouncements(annRes.data);
       } catch (error) {
-        console.log("No announcements found (or table not created yet)");
+        console.log("No announcements found");
       }
 
     } catch (err) {
@@ -62,7 +55,6 @@ const Dashboard = () => {
 
   // --- 2. ACTIONS ---
   const handleLogout = async () => {
-    // Clear Local Storage
     localStorage.removeItem('token');
     localStorage.removeItem('userInfo');
     navigate('/login');
@@ -79,7 +71,7 @@ const Dashboard = () => {
     }
   };
 
-  // ADMIN: Create Course
+  // ADMIN ACTIONS
   const handleCreateCourse = async (e) => {
     e.preventDefault();
     try {
@@ -92,7 +84,6 @@ const Dashboard = () => {
     }
   };
 
-  // ADMIN: Delete Course
   const handleDeleteCourse = async (id) => {
     if(!confirm("Are you sure you want to delete this course?")) return;
     try {
@@ -103,14 +94,13 @@ const Dashboard = () => {
     }
   };
 
-  // ADMIN: Assign Grade
   const handleAssignGrade = async (e) => {
       e.preventDefault();
       try {
           await axios.post(`${API_URL}/grades`, gradeForm);
           alert("Grade Assigned Successfully!");
-          setGradeForm({ student_email: '', course_code: '', grade: '' }); // Reset form
-          fetchData(); // Refresh to see updates
+          setGradeForm({ student_email: '', course_code: '', grade: '' });
+          fetchData();
       } catch (err) {
           alert(err.response?.data?.message || "Failed to assign grade");
       }
@@ -118,7 +108,6 @@ const Dashboard = () => {
 
   if (!user) return <div className="loading">Loading Portal...</div>;
 
-  // Helper: Format Full Name
   const fullName = user.first_name 
     ? `${user.first_name} ${user.middle_name || ''} ${user.last_name} ${user.suffix || ''}`
     : user.fullname;
@@ -132,12 +121,14 @@ const Dashboard = () => {
       <div className="sidebar">
         <div className="sidebar-header">TIGERLOOK UNIVERSITY</div>
         
-        <div className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
-          <span>👤 Profile & Home</span>
+        {/* 🏠 HOME TAB (Announcements) */}
+        <div className={`nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')}>
+          <span>🏠 Home</span>
         </div>
 
-        <div className={`nav-item ${activeTab === 'assignments' ? 'active' : ''}`} onClick={() => setActiveTab('assignments')}>
-            <span>📝 Assignments</span>
+        {/* 👤 PROFILE TAB (New Separate Tab) */}
+        <div className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
+          <span>👤 Profile</span>
         </div>
         
         <div className={`nav-item ${activeTab === 'courses' ? 'active' : ''}`} onClick={() => setActiveTab('courses')}>
@@ -158,7 +149,7 @@ const Dashboard = () => {
       {/* 2. MAIN CONTENT AREA */}
       <div className="main-content">
         
-        {/* PROFILE HEADER */}
+        {/* HEADER BANNER (Laging visible) */}
         <div className="profile-banner">
           <div className="big-avatar">
             {fullName.charAt(0).toUpperCase()}
@@ -169,74 +160,80 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* --- VIEW 1: PROFILE & ANNOUNCEMENTS --- */}
-        {activeTab === 'profile' && (
-            <div>
-                {/* 📢 ANNOUNCEMENT SECTION (NEW) */}
-                <div style={{ maxWidth: '1000px', margin: '0 auto 2rem auto', background: 'white', padding: '1.5rem', borderRadius: '10px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
-                    <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '10px', color: '#2563eb' }}>
-                        📢 Campus Announcements
-                    </h3>
+        {/* --- VIEW 1: HOME (ANNOUNCEMENTS ONLY) --- */}
+        {activeTab === 'home' && (
+            <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+                <div style={{ background: 'white', padding: '2rem', borderRadius: '10px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+                    <h2 style={{ margin: '0 0 1.5rem 0', display: 'flex', alignItems: 'center', gap: '10px', color: '#2563eb', borderBottom: '2px solid #f1f5f9', paddingBottom: '1rem' }}>
+                        📢 Latest Announcements
+                    </h2>
                     
                     {announcements.length === 0 ? (
-                        <p style={{ color: '#64748b', fontStyle: 'italic' }}>No new announcements posted.</p>
+                        <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b', background: '#f8fafc', borderRadius: '8px' }}>
+                            <p>🎉 Welcome to Tiger Look Portal!</p>
+                            <p style={{ fontSize: '0.9rem' }}>No new announcements at the moment.</p>
+                        </div>
                     ) : (
-                        <div style={{ display: 'grid', gap: '1rem' }}>
+                        <div style={{ display: 'grid', gap: '1.5rem' }}>
                             {announcements.map((ann) => (
-                                <div key={ann.id} style={{ borderLeft: '4px solid #3b82f6', background: '#f8fafc', padding: '1rem', borderRadius: '0 4px 4px 0' }}>
-                                    <h4 style={{ margin: '0 0 5px 0', fontSize: '1.1rem' }}>{ann.title}</h4>
-                                    <p style={{ margin: '0 0 8px 0', color: '#334155', whiteSpace: 'pre-wrap' }}>{ann.content}</p>
-                                    <small style={{ color: '#94a3b8', fontSize: '0.8rem' }}>
-                                        Posted on: {new Date(ann.created_at).toLocaleDateString()}
-                                    </small>
+                                <div key={ann.id} style={{ borderLeft: '5px solid #3b82f6', background: '#f8fafc', padding: '1.5rem', borderRadius: '0 8px 8px 0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                                        <h3 style={{ margin: 0, color: '#1e293b', fontSize: '1.2rem' }}>{ann.title}</h3>
+                                        <span style={{ fontSize: '0.8rem', color: '#64748b', background: '#e2e8f0', padding: '2px 8px', borderRadius: '10px' }}>
+                                            {new Date(ann.created_at).toLocaleDateString()}
+                                        </span>
+                                    </div>
+                                    <p style={{ margin: 0, color: '#475569', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{ann.content}</p>
                                 </div>
                             ))}
                         </div>
                     )}
                 </div>
+            </div>
+        )}
 
-                {/* EXISTING PROFILE GRID */}
-                <div className="info-grid">
-                    <div className="info-card">
-                        <div className="card-header">Basic Information</div>
-                        <div className="info-row">
-                            <span className="label">Full Name</span>
-                            <span className="value">{fullName.toUpperCase()}</span>
-                        </div>
-                        <div className="info-row">
-                            <span className="label">Email Address</span>
-                            <span className="value">{user.email}</span>
-                        </div>
-                        <div className="info-row">
-                            <span className="label">Gender</span>
-                            <span className="value">{user.gender || 'Not specified'}</span>
-                        </div>
-                        <div className="info-row">
-                            <span className="label">Birthday</span>
-                            <span className="value">{user.birthdate ? new Date(user.birthdate).toLocaleDateString() : 'N/A'}</span>
-                        </div>
+        {/* --- VIEW 2: PROFILE (DETAILS ONLY) --- */}
+        {activeTab === 'profile' && (
+            <div className="info-grid">
+                <div className="info-card">
+                    <div className="card-header">Basic Information</div>
+                    <div className="info-row">
+                        <span className="label">Full Name</span>
+                        <span className="value">{fullName.toUpperCase()}</span>
                     </div>
+                    <div className="info-row">
+                        <span className="label">Email Address</span>
+                        <span className="value">{user.email}</span>
+                    </div>
+                    <div className="info-row">
+                        <span className="label">Gender</span>
+                        <span className="value">{user.gender || 'Not specified'}</span>
+                    </div>
+                    <div className="info-row">
+                        <span className="label">Birthday</span>
+                        <span className="value">{user.birthdate ? new Date(user.birthdate).toLocaleDateString() : 'N/A'}</span>
+                    </div>
+                </div>
 
-                    <div className="info-card">
-                        <div className="card-header">System Settings</div>
+                <div className="info-card">
+                    <div className="card-header">System Settings</div>
+                    <div className="info-row">
+                        <span className="label">Language</span>
+                        <span className="value">English (United States)</span>
+                    </div>
+                    <div className="info-row">
+                        <span className="label">Privacy Settings</span>
+                        <span className="value">Standard</span>
+                    </div>
                         <div className="info-row">
-                            <span className="label">Language</span>
-                            <span className="value">English (United States)</span>
-                        </div>
-                        <div className="info-row">
-                            <span className="label">Privacy Settings</span>
-                            <span className="value">Standard</span>
-                        </div>
-                         <div className="info-row">
-                            <span className="label">Notifications</span>
-                            <span className="value">Stream notifications</span>
-                        </div>
+                        <span className="label">Notifications</span>
+                        <span className="value">Stream notifications</span>
                     </div>
                 </div>
             </div>
         )}
 
-        {/* --- VIEW 2: COURSE MANAGER --- */}
+        {/* --- VIEW 3: COURSE MANAGER --- */}
         {activeTab === 'courses' && (
             <div className="info-card" style={{ maxWidth: '1000px', margin: '0 auto' }}>
                 <div style={{ display: 'flex', borderBottom: '1px solid #eeeeee' }}>
@@ -315,12 +312,11 @@ const Dashboard = () => {
             </div>
         )}
 
-        {/* --- VIEW 3: GRADES --- */}
+        {/* --- VIEW 4: GRADES --- */}
         {activeTab === 'grades' && (
             <div className="info-card" style={{ maxWidth: '1000px', margin: '0 auto' }}>
                 <div className="card-header">Academic Records & Grades</div>
                 
-                {/* ADMIN VIEW: Assign Grade Form */}
                 {isAdmin && (
                     <div style={{padding: '1.5rem', borderBottom: '1px solid #eee', background: '#f8fafc'}}>
                         <h4 style={{ margin: '0 0 1rem 0', color: 'var(--primary)' }}>Admin: Assign Grade</h4>
@@ -342,7 +338,6 @@ const Dashboard = () => {
                     </div>
                 )}
 
-                {/* STUDENT/LIST VIEW */}
                 <div style={{padding: '1rem'}}>
                     {grades.length === 0 ? <p style={{padding: '2rem', textAlign: 'center', color: '#64748b'}}>No grades recorded yet.</p> : (
                         <table style={{width: '100%', borderCollapse: 'collapse'}}>
