@@ -224,13 +224,13 @@ const Dashboard = () => {
             <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
                 <div style={cardStyle}>
                     <h1 style={{ margin: '0 0 1.5rem 0', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--primary)', borderBottom: '2px solid var(--border-color)', paddingBottom: '1rem' }}>
-                        📢 Announcements
+                         Announcements
                     </h1>
                     
                     {announcements.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)', background: 'var(--bg-main)', borderRadius: '8px' }}>
-                            <p>🎉 Welcome to Tiger Look Portal!</p>
-                            <p style={{ fontSize: '1rem' }}>Sir Doncoy Gwapings mo!</p>
+                            <h3>🎉 Welcome to Tiger Look Portal!</h3>
+                            <h3 style={{ fontSize: '1rem' }}>Sir Doncoy Gwapings mo!</h3>
                         </div>
                     ) : (
                         <div style={{ display: 'grid', gap: '1.5rem' }}>
