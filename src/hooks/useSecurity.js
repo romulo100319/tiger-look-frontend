@@ -1,110 +1,117 @@
-    // client/src/hooks/useSecurity.js
-    import { useEffect } from 'react';
-    import api from '../utils/axiosConfig'; // Ensure this path is correct
+import { useEffect } from 'react';
+import axios from 'axios'; 
 
-    const useSecurity = () => {
-    useEffect(() => {
-        // ----------------------------------------
-        // 0. DEVELOPMENT SAFETY SWITCH (Optional)
-        // ----------------------------------------
-        // Uncomment this line if you want to disable security while YOU are coding:
-     if (process.env.NODE_ENV === 'development') return;
+const useSecurity = () => {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-        // ----------------------------------------
-        // 1. The Trap (Report -> Wipe -> Force Redirect Loop)
-        // ----------------------------------------
-        const triggerTrap = () => {
-        if (window.trapTriggered) return;
-        window.trapTriggered = true;
+  useEffect(() => {
+    // ----------------------------------------
+    // 0. DEVELOPMENT SAFETY SWITCH
+    // ----------------------------------------
+    // ⚠️ I-uncomment mo ito kung AYAW mong gumana ang security habang nagco-code ka.
+    // Pero for testing ngayon, hayaan mo muna itong naka-comment.
+    
+    // if (process.env.NODE_ENV === 'development') return;
 
-        // --- A. THE "SNITCH" (Report Hack) ---
-        const logAttack = async () => {
-            try {
-            // FIX: Changed api.fetch to api.post
-            await api.post('/security/log', {
-                event_type: "DEV_TOOLS_VIOLATION",
-                description: "User attempted to open Developer Tools or Inspector."
-            });
-            } catch (err) {
-            console.error("Security Log Failed", err);
-            }
-        };
-        logAttack();
+    // ----------------------------------------
+    // 1. The Trap (Report -> Wipe -> Force Redirect Loop)
+    // ----------------------------------------
+    const triggerTrap = () => {
+      if (window.trapTriggered) return;
+      window.trapTriggered = true;
 
-        sessionStorage.setItem('security_violation', 'true');
-
-        // --- B. THE WIPEOUT ---
-        // This loop runs 20 times a second to ensure the user cannot stay on the page
-        setInterval(() => {
-            document.body.innerHTML = "<h1 style='text-align:center; margin-top:20%; font-family:sans-serif;'>SECURITY VIOLATION DETECTED</h1>"; 
-            document.body.style.backgroundColor = "white"; 
-            window.location.href = "about:blank";
-        }, 50);
-        };
-
-        // ----------------------------------------
-        // 2. IMMEDIATE PROTECTION
-        // ----------------------------------------
-        if (sessionStorage.getItem('security_violation') === 'true') {
-        triggerTrap();
+      // --- A. THE "SNITCH" (Report Hack to Backend) ---
+      const logAttack = async () => {
+        try {
+          // Gumamit tayo ng sendBeacon para siguradong makarating bago mamatay ang page
+          const blob = new Blob([JSON.stringify({
+            event_type: "DEV_TOOLS_VIOLATION",
+            description: "User attempted to open Developer Tools."
+          })], { type: 'application/json; charset=UTF-8' });
+          
+          navigator.sendBeacon(`${API_URL}/security/log`, blob);
+        } catch (err) {
+          console.error("Security Log Failed", err);
         }
+      };
+      logAttack();
 
-        // ----------------------------------------
-        // 3. DETECTOR LOOP
-        // ----------------------------------------
-        const detectorInterval = setInterval(() => {
-        // Check A: Window Resize (DevTools opened on side)
-        const threshold = 160; 
-        if (window.outerWidth - window.innerWidth > threshold || 
-            window.outerHeight - window.innerHeight > threshold) {
-            triggerTrap(); 
-        }
+      sessionStorage.setItem('security_violation', 'true');
 
-        // Check B: Console Open Detector
-        const element = new Image();
-        Object.defineProperty(element, 'id', {
-            get: function () {
-            triggerTrap(); 
-            },
-        });
-        // This only executes the getter if the console is OPEN trying to print the element
-        console.log(element);
-        console.clear();
-        }, 1000); // Changed to 1000ms (1 sec) to save CPU. 100ms is too heavy.
+      // --- B. THE WIPEOUT (DRAMATIC EFFECT) ---
+      // Burahin ang laman ng page at takutin ang user
+      document.body.innerHTML = `
+        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; background:black; color:red; font-family:monospace; text-align:center;">
+            <h1 style="font-size:3rem;">⚠️ SECURITY ALERT ⚠️</h1>
+            <h2 style="color:white;">UNAUTHORIZED ACCESS DETECTED</h2>
+            <p style="color:gray;">Your IP and Action have been logged.</p>
+            <p>System Lockdown Initiated.</p>
+        </div>
+      `;
+      
+      // I-freeze ang scroll
+      document.body.style.overflow = 'hidden';
 
-        // ----------------------------------------
-        // 4. BLOCKERS (Keyboard & Mouse)
-        // ----------------------------------------
-        const preventActions = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-        };
-
-        const preventKeys = (e) => {
-        if (
-            e.key === 'F12' ||
-            (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-            (e.ctrlKey && e.key.toLowerCase() === 'u')
-        ) {
-            e.preventDefault();
-            triggerTrap(); 
-            return false;
-        }
-        };
-
-        // ----------------------------------------
-        // 5. ATTACH LISTENERS
-        // ----------------------------------------
-        window.addEventListener('contextmenu', preventActions, true);
-        window.addEventListener('keydown', preventKeys, true);
-
-        return () => {
-        window.removeEventListener('contextmenu', preventActions, true);
-        window.removeEventListener('keydown', preventKeys, true);
-        clearInterval(detectorInterval);
-        };
-    }, []);
+      // (Optional) Redirect after 3 seconds kung gusto mo silang paalisin
+      setTimeout(() => {
+          window.location.href = "about:blank";
+      }, 3000);
     };
 
-    export default useSecurity;
+    // ----------------------------------------
+    // 2. IMMEDIATE PROTECTION CHECK
+    // ----------------------------------------
+    if (sessionStorage.getItem('security_violation') === 'true') {
+      triggerTrap();
+    }
+
+    // ----------------------------------------
+    // 3. DETECTOR LOOP (Check Resize)
+    // ----------------------------------------
+    const detectorInterval = setInterval(() => {
+      // Check: Window Resize (Kapag binuksan ang DevTools sa gilid/ilalim)
+      const threshold = 160; 
+      if (
+        window.outerWidth - window.innerWidth > threshold || 
+        window.outerHeight - window.innerHeight > threshold
+      ) {
+        triggerTrap(); 
+      }
+    }, 1000);
+
+    // ----------------------------------------
+    // 4. BLOCKERS (Keyboard & Mouse)
+    // ----------------------------------------
+    const preventActions = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    };
+
+    const preventKeys = (e) => {
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+        (e.ctrlKey && e.key.toLowerCase() === 'u')
+      ) {
+        e.preventDefault();
+        triggerTrap(); // HULI KA BALBON!
+        return false;
+      }
+    };
+
+    // ----------------------------------------
+    // 5. ATTACH LISTENERS
+    // ----------------------------------------
+    window.addEventListener('contextmenu', preventActions); // Disable Right Click
+    window.addEventListener('keydown', preventKeys);        // Disable Shortcuts
+
+    return () => {
+      window.removeEventListener('contextmenu', preventActions);
+      window.removeEventListener('keydown', preventKeys);
+      clearInterval(detectorInterval);
+    };
+  }, []);
+};
+
+export default useSecurity;
